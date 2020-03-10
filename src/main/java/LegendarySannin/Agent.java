@@ -1,23 +1,17 @@
 package LegendarySannin;
 
-import java.util.Random;
+abstract class Agent {
+    protected int priority;
+    protected int maxDepth;
 
-class Agent {
-    private int priority;
-
-    public Agent(int p) {
+    public Agent(int p, int d) {
         priority = p;
+        maxDepth = d;
+    }
+
+    public void mark(char[][] board, int x, int y) {
+        board[x][y] = priority ==  1 ? 'X' : 'O';
     }
     
-    public void move(char[][] board) {
-        int w = board.length;
-
-        while (true) {
-            int x = new Random().nextInt(w), y = new Random().nextInt(w);
-            if (board[x][y] == 0) {
-                board[x][y] = priority == 1 ? 'X' : 'O';
-                return;
-            }
-        }
-    }
+    abstract public void move(char[][] board);
 }

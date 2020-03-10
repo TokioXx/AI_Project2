@@ -1,42 +1,36 @@
 package LegendarySannin;
 
-// import java.net.URI;
-// import java.net.http.HttpClient;
-// import java.net.http.HttpRequest;
-// import java.net.http.HttpResponse;
-// import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Arrays;
 
-/**
- * Hello world!
- *
- */
 public class App {
+    private static final long SLEEPTIME = 1000;
+
     public static void main(String[] args) throws InterruptedException {
-        // HttpClient client = HttpClient.newHttpClient();
-        // HttpRequest request = HttpRequest.newBuilder().uri(URI.create("https://google.com")).build();
+        char[][] board = new char[Board.SIZE][Board.SIZE];
+        for (char[] row: board) Arrays.fill(row, '-');
 
-        // client.sendAsync(request, BodyHandlers.ofString())
-        //  .thenApply(HttpResponse::body)
-        //  .thenAccept(System.out::println)
-        //  .join(); 
-
-        int size = 10;
-        char[][] board = new char[size][size];
-        Board b = new Board(10, board);
+        Board b = new Board(board);
         b.init();
 
-        Agent agent = new Agent(1);
-        Agent agent2 = new Agent(2);
+        Agent agent = new RationalAgent(1, 2);
+        Agent agent2 = new RationalAgent(2, 2);
 
         while (true) {
             agent.move(board);
-            Thread.sleep(500);
-            agent2.move(board);
-            Thread.sleep(500);
+            Thread.sleep(SLEEPTIME);
 
             b.update();
             if (b.hasFinished() != 0) {
-                Thread.sleep(3000);
+                Thread.sleep(SLEEPTIME);
+                System.exit(0);
+            }
+
+            agent2.move(board);
+            Thread.sleep(SLEEPTIME);
+
+            b.update();
+            if (b.hasFinished() != 0) {
+                Thread.sleep(SLEEPTIME);
                 System.exit(0);
             }
         }
