@@ -2,16 +2,15 @@ package LegendarySannin;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class State {
     int x;
     int y;
-    int score;
+    long score;
 
-    public State(int x, int y, int score) {
+    public State(int x, int y, long score) {
         this.x = x;
         this.y = y;
         this.score = score;
@@ -19,13 +18,11 @@ class State {
 }
 
 public class RationalAgent extends Agent {
-    private static final Logger LOGGER = Logger.getLogger( RationalAgent.class.getName() );
-
     public RationalAgent(int p, int depth) {
         super(p, depth);
     }
 
-    public Set<Integer> getAvaliablePosition(char[][] board, char target) {
+    public Set<Integer> getAvaliablePosition(char[][] board) {
         int len = board.length;
         Set<Integer> res = new HashSet<>();
         for (int i = 0; i < len; i ++) {
@@ -49,142 +46,114 @@ public class RationalAgent extends Agent {
         return res;
     }
 
-    public State value(char[][] board, int depth) {
-        if (depth > this.maxDepth) {
-            int score = evaluate(board);
-            // System.out.println("Value Score: " + score);
-            // for (char[] b: board) System.out.println(Arrays.toString(b));
-            return new State(-1, -1, score);
-        }
-        char target = (depth + priority) % 2 == 0 ? 'X' : 'O';
-        Set<Integer> avaliablePosition = getAvaliablePosition(board, target);
+    public State minimize(char[][] board, int depth, long alpha, long beta) {
+        State s = new State(-1, -1, Long.MAX_VALUE);
 
-        State s = new State(0, 0, depth % 2 == 1 ? Integer.MIN_VALUE : Integer.MAX_VALUE);
+        Set<Integer> avaliablePosition = getAvaliablePosition(board); 
+        if (avaliablePosition.size() == 0) return null;
+
         for (int p: avaliablePosition) {
             int x = p / board.length, y = p % board.length;
+            // System.out.println(String.format("Minimize(%d) (%d, %d)", depth, x, y));
+            board[x][y] = 'O';
 
-            board[x][y] = target;
+            State ns = value(board, depth + 1, alpha, beta);
+            if (ns.score < s.score) s = new State(x, y, ns.score);
+            if (s.score <= alpha) {
+                this.unmark(board, x, y);
+                break;
+            }
+            beta = Math.min(beta, s.score);
 
-            State ns = value(board, depth + 1);
-            // System.out.println(String.format("(%d) [%d, %d] [%d, %d]: %d", depth, x, y, ns.x, ns.y, ns.score));
-
-            if (depth % 2 == 1 && ns.score > s.score) s = new State(x, y, ns.score);
-            else if (depth % 2 == 0 && ns.score < s.score) s = new State(x, y, ns.score);
-
-            board[x][y] = '-';
+            this.unmark(board, x, y);
         }
-        
-        System.out.println(String.format("Final (%d) [%d, %d]: %d", depth, s.x, s.y, s.score));
 
+        // System.out.println(String.format("Minimize(%d) (%d, %d) %d", depth, s.x, s.y, s.score));
+        return s;
+    }
+    public State maximize(char[][] board, int depth, long alpha, long beta) {
+        State s = new State(-1, -1, Long.MIN_VALUE);
+
+        Set<Integer> avaliablePosition = getAvaliablePosition(board); 
+        if (avaliablePosition.size() == 0) return null;
+
+        for (int p: avaliablePosition) {
+            int x = p / board.length, y = p % board.length;
+            // System.out.println(String.format("Maximize(%d) (%d, %d)", depth, x, y));
+            this.mark(board, x, y);
+
+            State ns = value(board, depth + 1, alpha, beta);
+            if (ns.score > s.score) s = new State(x, y, ns.score);
+            if (s.score >= beta) {
+                this.unmark(board, x, y);
+                break;
+            }
+            alpha = Math.max(alpha, s.score);
+
+            this.unmark(board, x, y);
+        }
+
+        // System.out.println(String.format("Maximize(%d) (%d, %d) %d", depth, s.x, s.y, s.score));
         return s;
     }
 
-    public int evaluate(char[][] board) {
-        int score = 0;
-
-        score += evaluateMomentum(board);
-        score += evaluateCompactness(board);
-
-        return score;
-    }
-
-    public int evaluateCompactness(char[][] board) {
-        int score = 0, m = board.length / 2;
-        int sign = this.priority == 1 ? 1 : -1;
-
-        for (int i = 0; i < board.length; i ++) {
-            for (int j = 0; j < board.length; j ++) {
-                char c = board[i][j];
-
-                if (c == '-') continue;
-                else if (c == 'X') score -= sign * (Math.abs(i - m) + Math.abs(j - m));
-                else if (c == 'O') score += sign * (Math.abs(i - m) + Math.abs(j - m));
-            }
-        }
-
-        return score;
-    }
-
-    public int evaluateMomentum(char[][] board) {
-        int score = 0;
-
-        // ---
-        for (int x = 0; x < board.length; x ++) score += scoreRow(board, x, 0, 0, 1);
-        // |||
-        for (int y = 0; y < board.length; y ++) score += scoreRow(board, 0, y, 1, 0);
-        // \\\
-        for (int x = 0; x < board.length; x ++) score += scoreRow(board, x, 0, 1, 1);
-        for (int y = 1; y < board.length; y ++) score += scoreRow(board, 0, y, 1, 1);
-        // ///
-        for (int x = board.length - 1; x >= 0; x --) score += scoreRow(board, x, 0, -1, 1);
-        for (int y = 1; y < board.length; y ++) score += scoreRow(board, board.length - 1, y, -1, 1);
-
-        return score;
-    }
-
-    public int scoreRow(char[][] board, int x, int y, int dx, int dy) {
-        StringBuilder sb = new StringBuilder();
-        int len = board.length;
-
-        while (x >= 0 && x < len && y >= 0 && y < len) {
-            sb.append(board[x][y]); 
-
-            x += dx;
-            y += dy;
+    public State value(char[][] board, int depth, long alpha, long beta) {
+        if (depth > this.maxDepth) {
+            long score = evaluate(board);
+            // System.out.println(String.format("Terminal(%d) (%d)", depth, score));
+            return new State(-1, -1, score);
         }
         
-        int score = score(sb.toString());
-        // LOGGER.info(String.format("ScoreRow(%s): %d", sb.toString(), score));
+        if (depth % 2 == 1) return maximize(board, depth, alpha, beta);
+        else return minimize(board, depth, alpha, beta);
+    }
+
+    public long evaluate(char[][] board) {
+        long score = 0;
+
+        score += evaluateMomentum(board);
+        return score;
+    }
+
+    public long evaluateMomentum(char[][] board) {
+        long score = 0;
+        int sign = this.priority == 1 ? 1 : -1;
+        for (String s: Helper.enumerates(board)) {
+            long sx = sign * evaluateRowMomentum(s, 'X');
+            long so = -sign * evaluateRowMomentum(s, 'O');
+            score += sx + so;
+            // System.out.println(String.format("Evaluate(%s): %d", s, sx + so));
+        }
 
         return score;
     }
 
-    public int score(String s) {
-        int sign = this.priority == 1 ? 1 : -1;
-        int score = 0;
-
-        Pattern px = Pattern.compile("[-O]X+[-O]");
-        Pattern po = Pattern.compile("[-X]O+[-X]");
-        Matcher mx = px.matcher(s);
-        Matcher mo = po.matcher(s);
-
-        if (mx.find()) {
-            String str = mx.group();
-
-            while (mx.find(mx.start() + 2)) {
-                if (mx.group().length() > str.length()) str = mx.group();
-            }
-
-            int sx = sign * (int) Math.pow(10, str.length());
-            if (str.charAt(0) != '-') sx /= 10;
-            if (str.charAt(str.length() - 1) != '-') sx /= 10;
-            
-            score += sx;
+    public long evaluateRowMomentum(String s, char c) {
+        long score = 0;
+        Pattern p = Pattern.compile(String.format("-?[%c]+-?", c));
+        Matcher m = p.matcher(s);
+        
+        if (!m.find()) return 0;
+        String str = m.group();
+        while (m.find(m.end())) {
+            if (m.group().length() > str.length()) str = m.group();
         }
 
-        if (mo.find()) {
-            String str = mo.group();
+        int len = str.length(), count = 1;
+        if (str.charAt(0) == '-') count ++;
+        if (str.charAt(str.length() - 1) == '-') count ++;
+        score = (int) (Math.pow(10, len - count)) * count;
 
-            while (mo.find(mo.start() + 2)) {
-                if (mo.group().length() > str.length()) str = mo.group();
-            }
-
-            int so = -sign * (int) Math.pow(10, str.length());
-            if (str.charAt(0) != '-') so /= 10;
-            if (str.charAt(str.length() - 1) != '-') so /= 10;
-            
-            score += so;
-        }
-
+        // System.out.println(String.format("Evaluate(%s): %d", s, score));
         return score;
     }
 
     public void move(char[][] board) {
         char[][] b1 = board.clone();
         for (int i = 0; i < b1.length; i ++) b1[i] = board[i].clone();
-        State s = value(b1, 1);
+        State s = value(b1, 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
         mark(board, s.x, s.y);
 
-        LOGGER.info(String.format("Agent %d make a move (%d, %d)", priority, s.x, s.y));
+        // System.out.println(String.format("Agent %d make a move (%d, %d)", priority, s.x, s.y));
     }
 }

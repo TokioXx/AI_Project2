@@ -12,6 +12,10 @@ abstract class Agent {
     public void mark(char[][] board, int x, int y) {
         board[x][y] = priority ==  1 ? 'X' : 'O';
     }
+
+    public void unmark(char[][] board, int x, int y) {
+        board[x][y] = '-';
+    }
     
     abstract public void move(char[][] board);
 }

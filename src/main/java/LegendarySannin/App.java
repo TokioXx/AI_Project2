@@ -3,7 +3,7 @@ package LegendarySannin;
 import java.util.Arrays;
 
 public class App {
-    private static final long SLEEPTIME = 1000;
+    private static final long SLEEPTIME = 100;
 
     public static void main(String[] args) throws InterruptedException {
         char[][] board = new char[Board.SIZE][Board.SIZE];
@@ -13,7 +13,10 @@ public class App {
         b.init();
 
         Agent agent = new RationalAgent(1, 2);
-        Agent agent2 = new RationalAgent(2, 2);
+        // Agent agent2 = new RationalAgent(2, 2);
+
+        ManualAgent agent2 = new ManualAgent(2, 2);
+        b.addListener(agent2.getAdapter());
 
         while (true) {
             agent.move(board);
@@ -21,7 +24,7 @@ public class App {
 
             b.update();
             if (b.hasFinished() != 0) {
-                Thread.sleep(SLEEPTIME);
+                Thread.sleep(SLEEPTIME * 10);
                 System.exit(0);
             }
 
@@ -30,7 +33,7 @@ public class App {
 
             b.update();
             if (b.hasFinished() != 0) {
-                Thread.sleep(SLEEPTIME);
+                Thread.sleep(SLEEPTIME * 10);
                 System.exit(0);
             }
         }

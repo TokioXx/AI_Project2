@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
 
 class Board extends JPanel{
     /**
@@ -29,6 +30,8 @@ class Board extends JPanel{
         for(int i = 0; i < SIZE; i ++){
             for(int j = 0; j < SIZE; j ++){
                 g.clearRect(i * Constant.WIDTH, j * Constant.WIDTH, Constant.WIDTH - 2, Constant.WIDTH - 2);
+                g.drawString(String.valueOf(i + ", "), (i) * Constant.WIDTH + 5, (j + 1) * Constant.WIDTH - 10);
+                g.drawString(String.valueOf(j), (i) * Constant.WIDTH + 20, (j + 1) * Constant.WIDTH - 10);
             }
         }
         g.setFont(new Font("Monaco", Font.PLAIN, 40));
@@ -39,7 +42,9 @@ class Board extends JPanel{
         }
 
         int fi = hasFinished();
-        if (fi != 0) {
+        if (fi == 3) {
+            g.drawString("DRAW !!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
+        } else if (fi != 0) {
             g.drawString(fi == 1 ? "Cong!! You Win !!" : "Ooops!! You Lose!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
         }
     }
@@ -50,7 +55,11 @@ class Board extends JPanel{
     }
 
     public int hasFinished() {
-        int res = 0;
+        int res = 0, count = 0;
+
+        for (int x = 0; x < board.length; x ++) for (int y = 0; y < board.length; y ++) if (board[x][y] != '-') count ++;
+        if (count == SIZE * SIZE) return 3;
+
         // ---
         for (int x = 0; x < board.length; x ++) res = Math.max(res, validate(board, x, 0, 0, 1));
         // |||
@@ -87,10 +96,14 @@ class Board extends JPanel{
     }
 
     public void init() {
-        this.frame.setSize(Constant.WIDTH * this.SIZE, Constant.WIDTH * this.SIZE + 20);
+        this.frame.setSize(Constant.WIDTH * SIZE, Constant.WIDTH * SIZE + 20);
         this.frame.getContentPane().add(this);
         this.frame.setLocationRelativeTo(null);
         this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.frame.setVisible(true);
+    }
+
+    public void addListener(MouseInputAdapter adapter) {
+        this.addMouseListener(adapter);
     }
 }
