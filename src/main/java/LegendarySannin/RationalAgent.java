@@ -55,7 +55,7 @@ public class RationalAgent extends Agent {
         for (int p: avaliablePosition) {
             int x = p / board.length, y = p % board.length;
             // System.out.println(String.format("Minimize(%d) (%d, %d)", depth, x, y));
-            board[x][y] = 'O';
+            board[x][y] = priority ==  2 ? 'X' : 'O';
 
             State ns = value(board, depth + 1, alpha, beta);
             if (ns.score < s.score) s = new State(x, y, ns.score);
@@ -144,7 +144,7 @@ public class RationalAgent extends Agent {
         if (str.charAt(str.length() - 1) == '-') count ++;
         score = (int) (Math.pow(10, len - count)) * count;
 
-        // System.out.println(String.format("Evaluate(%s): %d", s, score));
+        // System.out.println(String.format("Evaluate[%c] (%s): %d", c, s, score));
         return score;
     }
 
