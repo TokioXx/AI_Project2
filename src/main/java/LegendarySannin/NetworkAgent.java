@@ -9,8 +9,15 @@ import okhttp3.Response;
 
 public class NetworkAgent extends Agent {
 
-    public NetworkAgent() {
-        super();
+    // private Agent agent;
+
+    public NetworkAgent(int p, int d) {
+        super(p, d);
+
+        priority = p;
+        maxDepth = d;
+
+        // this.agent = new RationalAgent(p, d);
     }
 
     public char[][] requestBoard() {
@@ -37,15 +44,26 @@ public class NetworkAgent extends Agent {
 
     public void move(char[][] board) {
         try {
-            char[][] board2 = getBoard();
+            while (true) {
+                char[][] board2 = getBoard();
+                int count = 0;
 
-            for (int i = 0; i < board2.length; i ++) {
-                for (int j = 0; j < board2.length; j ++) {
-                    if (board2[i][j] != '-') board[i][j] = board2[i][j] == 'X' ? 'O' : 'X';
+                for (int i = 0; i < board2.length; i ++) {
+                    for (int j = 0; j < board2.length; j ++) {
+                        if (board2[i][j] != '-') {
+                            board[i][j] = board2[i][j] == 'X' ? 'O' : 'X';
+                            count ++;
+                        }
+                    } 
                 } 
-            } 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+
+                if (count % 2 == this.priority % 2) break;
+                Thread.sleep(1000 * 5);
+            }
+
+            // agent.move(board);
+            
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         

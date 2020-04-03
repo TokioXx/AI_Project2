@@ -13,8 +13,6 @@ abstract class Agent {
     protected int maxDepth;
     protected final OkHttpClient httpClient = new OkHttpClient();
 
-    public Agent() {}
-
     public Agent(int p, int d) {
         priority = p;
         maxDepth = d;

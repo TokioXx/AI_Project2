@@ -41,12 +41,12 @@ class Board extends JPanel{
             }
         }
 
-        int fi = hasFinished();
-        if (fi == 3) {
-            g.drawString("DRAW !!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
-        } else if (fi != 0) {
-            g.drawString(fi == 1 ? "Cong!! You Win !!" : "Ooops!! You Lose!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
-        }
+        // int fi = hasFinished();
+        // if (fi == 3) {
+        //     g.drawString("DRAW !!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
+        // } else if (fi != 0) {
+        //     g.drawString(fi == 1 ? "Cong!! You Win !!" : "Ooops!! You Lose!!", Constant.WIDTH, 5 * Constant.WIDTH - 10);
+        // }
     }
 
     public void update() {

@@ -11,6 +11,7 @@ public class RatinoalAgentTest {
         Assert.assertTrue(agent.evaluateRowMomentum("-X-", 'X') > agent.evaluateRowMomentum("-XO", 'X'));
         Assert.assertTrue(agent.evaluateRowMomentum("-XXX-", 'X') > agent.evaluateRowMomentum("-XX-O", 'X'));
         Assert.assertTrue(agent.evaluateRowMomentum("-XXXX-", 'X') > agent.evaluateRowMomentum("-XXX-", 'X'));
+        Assert.assertTrue(agent.evaluateRowMomentum("-XXXX-", 'X') == Integer.MAX_VALUE);
     }
 
     @Test
@@ -43,5 +44,22 @@ public class RatinoalAgentTest {
 
         b1[0][0] = 'x';
         Assert.assertEquals('-', b[0][0]);
+    }
+
+    @Test
+    public void testCross() {
+        char[][] board = {
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', 'X', '-', '-', '-', '-' },
+            { '-', '-', '-', 'X', 'X', 'X', '-', '-', '-' },
+            { '-', '-', '-', '-', 'X', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+            { '-', '-', '-', '-', '-', '-', '-', '-', '-' },
+        };
+
+        Assert.assertEquals(4000, new RationalAgent(1, 1).evaluateCrossFor(board, 'X'));
     }
 }

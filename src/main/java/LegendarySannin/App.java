@@ -12,12 +12,16 @@ public class App {
         Board b = new Board(board);
         b.init();
 
-        // Agent agent = new NetworkAgent();
+        // Agent agent = new NetworkAgent(1, 2);
+        // Agent agent2 = new RationalAgent(2, 2);
+
         Agent agent = new RationalAgent(1, 2);
-        Agent agent2 = new RationalAgent(2, 2);
+        Agent agent2 = new NetworkAgent(2, 2);
 
         // ManualAgent agent2 = new ManualAgent(2, 2);
         // b.addListener(agent2.getAdapter());
+        // Agent agent2 = new NetworkAgent(2, 2, "839");
+        // Agent agent2 = new RationalAgent(2, 2);
 
         while (true) {
             // System.out.println("========= Step for Agent 1 =======");
@@ -25,20 +29,20 @@ public class App {
             b.update();
             Thread.sleep(SLEEPTIME);
 
-            if (b.hasFinished() != 0) {
-                Thread.sleep(SLEEPTIME * 10);
-                System.exit(0);
-            }
+            // if (b.hasFinished() != 0) {
+            //     Thread.sleep(SLEEPTIME * 10);
+            //     System.exit(0);
+            // }
 
             // System.out.println("========= Step for Agent 2 =======");
             agent2.move(board);
             b.update();
             Thread.sleep(SLEEPTIME);
 
-            if (b.hasFinished() != 0) {
-                Thread.sleep(SLEEPTIME * 10);
-                System.exit(0);
-            }
+            // if (b.hasFinished() != 0) {
+            //     Thread.sleep(SLEEPTIME * 10);
+            //     System.exit(0);
+            // }
         }
     }
 

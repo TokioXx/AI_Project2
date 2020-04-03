@@ -25,7 +25,7 @@ public class NetworkTest {
     @Test
     public void requestBoard() throws IOException
     {
-        NetworkAgent agent = new NetworkAgent();
+        NetworkAgent agent = new NetworkAgent(2, 2);
         agent.move(null);
     }
 }
